@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prodigy Besetzungsrechner</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#00C853;--gd:#00A344;--gg:rgba(0,200,83,0.25);--card:rgba(0,0,0,0.04);--cb:rgba(0,0,0,0.08);--tx:#1A1A1A;--txm:rgba(0,0,0,0.5);--red:#FF3B30;--orange:#FF9500;--r:16px}
+html,body{height:100%;overflow-x:hidden;background:transparent;color:var(--tx);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+#app{width:100%;max-width:700px;margin:0 auto;padding:32px 20px 60px;display:flex;flex-direction:column;align-items:center}
+#app.fi{opacity:1;transform:translateY(0);transition:opacity .3s,transform .3s}
+#app.fo{opacity:0;transform:translateY(10px);transition:opacity .2s,transform .2s}
+.progress{display:flex;gap:8px;justify-content:center;margin-bottom:28px;width:100%;max-width:280px}
+.pd{flex:1;height:4px;border-radius:3px;background:rgba(0,0,0,0.08);transition:background .4s}.pd.a{background:var(--g)}
+.headline{font-size:clamp(26px,4vw,36px);font-weight:800;line-height:1.15;letter-spacing:-1px;margin-bottom:10px;text-align:center;color:var(--tx)}.headline .ac{color:var(--g)}
+.sub{font-size:16px;color:var(--txm);text-align:center}
+.q{font-size:clamp(20px,3vw,26px);font-weight:700;line-height:1.25;letter-spacing:-.3px;margin-bottom:24px;text-align:center;color:var(--tx)}
+.sl{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--g);margin-bottom:10px}
+.sc{display:flex;flex-direction:column;align-items:center;text-align:center;width:100%}
+.mr{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;justify-content:center;width:100%}
+.mb{flex:1;min-width:240px;max-width:320px;border:2px solid var(--cb);border-radius:16px;padding:24px 20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;background:#fff;transition:all .2s;font-family:inherit;color:var(--tx)}
+.mb:hover{border-color:var(--g);box-shadow:0 4px 20px var(--gg)}.mb:active{transform:scale(.98)}
+.mb .mi{font-size:36px}.mb .ml{font-size:18px;font-weight:700;line-height:1.3}.mb .ms{font-size:13px;color:var(--txm)}
+.og{display:flex;flex-direction:column;gap:10px;width:100%;max-width:480px}
+.ob{background:#fff;border:2px solid var(--cb);border-radius:var(--r);padding:16px 20px;font-size:18px;font-weight:600;color:var(--tx);cursor:pointer;transition:all .2s;text-align:center;font-family:inherit}
+.ob:hover{border-color:var(--g)}.ob:active{transform:scale(.98)}.ob.a{border-color:var(--g);background:rgba(0,200,83,0.08);color:var(--tx)}
+.tr{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.tb{background:#fff;border:2px solid var(--cb);border-radius:10px;padding:12px 18px;font-size:15px;font-weight:500;color:var(--tx);cursor:pointer;transition:all .2s;font-family:inherit}.tb:hover{border-color:var(--g)}.tb.a{border-color:var(--g);background:rgba(0,200,83,0.08)}
+.ti{width:100%;max-width:480px;padding:16px 20px;font-size:18px;font-weight:500;background:#fff;border:2px solid var(--cb);border-radius:var(--r);color:var(--tx);outline:none;font-family:inherit;text-align:center;transition:border .2s}.ti::placeholder{color:rgba(0,0,0,0.25)}.ti:focus{border-color:var(--g)}
+.th{font-size:13px;color:var(--txm);margin-top:8px}
+.bp{background:var(--g);border:none;border-radius:var(--r);padding:16px 40px;font-size:17px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 20px var(--gg)}.bp:hover{box-shadow:0 6px 28px var(--gg)}.bp:active{transform:scale(.97)}.bp:disabled{opacity:.3;box-shadow:none}
+.bg2{background:#fff;border:2px solid var(--cb);border-radius:var(--r);padding:14px 28px;font-size:15px;font-weight:600;color:var(--tx);cursor:pointer;font-family:inherit;transition:all .2s}.bg2:hover{border-color:var(--g)}
+.lk{background:none;border:none;color:var(--txm);font-size:14px;cursor:pointer;padding:8px;font-family:inherit}
+.sv{font-size:clamp(36px,6vw,48px);font-weight:800;color:var(--tx);margin:20px 0 10px;letter-spacing:-1px}
+.slider-wrap{width:100%;max-width:480px;position:relative;padding:0 4px}
+input[type="range"]{width:100%;height:6px;-webkit-appearance:none;appearance:none;background:rgba(0,0,0,0.08);border-radius:4px;outline:none;cursor:pointer;margin:0;display:block;touch-action:none}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:40px;height:40px;border-radius:50%;cursor:pointer;background:var(--g);box-shadow:0 2px 12px var(--gg);margin-top:-17px;border:3px solid #fff}
+input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:4px;background:rgba(0,0,0,0.08)}
+.slab{display:flex;justify-content:space-between;width:100%;max-width:480px;color:var(--txm);font-size:12px;margin-top:4px}
+.rl{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--txm);margin-bottom:6px}
+.rte{font-size:15px;color:var(--txm);margin-top:2px;margin-bottom:8px;font-weight:500;font-style:italic}
+.cmp-wrap{width:100%;max-width:520px;margin:16px 0 6px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.cmp-gauge{flex:1;min-width:200px;max-width:250px;text-align:center}
+.cmp-gauge .cg-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px}
+.cmp-gauge .cg-val{font-size:clamp(32px,5vw,42px);font-weight:800;line-height:1;margin-top:0}
+.cmp-gauge .cg-sub{font-size:11px;color:var(--txm);margin-top:2px}
+.cmp-warn{text-align:center;margin:12px 0 4px;padding:10px 16px;background:rgba(255,59,48,0.06);border:1px solid rgba(255,59,48,0.15);border-radius:12px;font-size:14px;color:rgba(0,0,0,0.6);line-height:1.4}
+.cmp-warn strong{color:#FF3B30;font-weight:700}
+.cmp-boost{text-align:center;margin:4px 0 10px;padding:10px 16px;background:rgba(0,200,83,0.06);border:1px solid rgba(0,200,83,0.15);border-radius:12px;font-size:14px;color:rgba(0,0,0,0.6);line-height:1.4}
+.cmp-boost strong{color:#00A344;font-weight:700}
+.rg{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.ri{background:#fff;border:1px solid var(--cb);border-radius:12px;padding:12px 16px;min-width:120px;display:flex;flex-direction:column;gap:4px}
+.ril{font-size:10px;color:var(--txm);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.riv{font-size:20px;font-weight:800;color:var(--tx)}
+.rsub{font-size:15px;color:var(--txm);margin-top:4px;margin-bottom:12px}
+.usp-section{width:100%;max-width:520px;margin-top:16px;margin-bottom:6px}
+.usp-title{font-size:20px;font-weight:800;color:var(--g);text-align:center;margin-bottom:14px}
+.usp-grid{display:flex;flex-direction:column;gap:6px}
+.usp-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--cb);border-radius:12px;padding:12px 16px}
+.usp-item .usp-icon{font-size:24px;flex-shrink:0;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:rgba(0,200,83,0.08);border-radius:10px}
+.usp-item .usp-text{flex:1}
+.usp-item .usp-h{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:1px}
+.usp-item .usp-d{font-size:12px;color:var(--txm);line-height:1.4}
+.cc{width:100%;max-width:520px;margin-top:14px;background:#fff;border:2px solid var(--cb);border-radius:16px;padding:18px 20px;cursor:pointer;text-align:center;transition:all .2s;font-family:inherit;color:var(--tx)}.cc:hover{border-color:var(--g)}
+.cc .ci{font-size:24px;margin-bottom:6px}.cc .ct{font-size:16px;font-weight:700;line-height:1.3}
+.bk{position:fixed;bottom:20px;left:20px;background:#fff;border:1px solid var(--cb);border-radius:10px;padding:10px 20px;font-size:14px;color:var(--txm);cursor:pointer;z-index:10;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.ov{position:fixed;inset:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.oc{background:#fff;border-radius:20px;padding:32px 28px;max-width:480px;width:100%;text-align:center;border:1px solid var(--cb);box-shadow:0 8px 40px rgba(0,0,0,0.1)}
+.oc h2{font-size:22px;margin-bottom:4px;color:var(--tx)}.oc .os{font-size:14px;color:var(--txm);margin-bottom:20px}
+.inf{width:100%;padding:14px 18px;font-size:16px;background:#fafafa;border:2px solid var(--cb);border-radius:10px;color:var(--tx);margin-bottom:10px;outline:none;font-family:inherit}.inf::placeholder{color:rgba(0,0,0,0.25)}.inf:focus{border-color:var(--g)}
+.br{display:flex;gap:10px;margin-top:8px}.br>*{flex:1}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g);color:#000;padding:12px 28px;border-radius:12px;font-size:15px;font-weight:700;box-shadow:0 6px 24px var(--gg);z-index:200;animation:tin .3s ease,tout .3s ease 2.2s forwards}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes tout{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(20px)}}
+.pw{text-align:center;margin-top:24px;opacity:0.4}
+.loading-ov{position:fixed;inset:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:16px}
+.loading-ov h2{font-size:22px;font-weight:800;color:var(--tx)}
+.loading-ov p{font-size:15px;color:var(--txm);max-width:320px;text-align:center}
+.loading-bar{width:280px;height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;margin-top:8px}
+.loading-bar .fill{height:100%;background:var(--g);border-radius:3px;width:0;animation:loadfill 2.8s ease forwards}
+@keyframes loadfill{0%{width:0}30%{width:45%}60%{width:72%}85%{width:90%}100%{width:100%}}
+.mail-send-card{width:100%;max-width:520px;margin-top:16px;background:#fff;border:2px solid rgba(0,200,83,0.2);border-radius:16px;padding:20px 24px;text-align:center}
+.mail-send-card .msc-title{font-size:16px;font-weight:700;color:var(--tx);margin-bottom:4px}
+.mail-send-card .msc-desc{font-size:13px;color:var(--txm);margin-bottom:12px}
+.mail-send-card .msc-email{font-size:14px;color:var(--g);font-weight:600;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var LOGO_SM="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKUAAAAyCAYAAAA9SBshAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAcnElEQVR42u19eXRc1Znn9729qlRaLdmS5d3yymZssBNMS8I4JoYBElqGYJgkZNoZJt0hzOlmekKCJLOEbgYcYuK0GdJxTHKaliYxHcM47oHIhhibjGzLRt4N2qXSYtWmevXqLfebP3SfeC5LlrxlDEffOXV06r1699537+9+y++79wphXD6XQkQCAAjud0S0Pyttx/Hh+0wDT0y7xBCRiAgRkdJ+e861q1WkC/p1ZaUAC48iQMUlVFkLcGQBQXU1AQCNQ+sSNAqiMwxQERHpwIEDC2bOnPltRMyPRCL/johbPkvAHF1qKkSgSuEy9ygA1Yjj0Lo467Zz585AR0fHqs7Ozju6u7u/1N3dfcexY8emExE2NjbOTiaT/eSRUChUOYJ2/QxqSqoUAKsdBIDJNY9PjhZlT3Wi/dngXERtIoAS9Oty2Ojou2fDacI1DiACMIbwuZnBV9xkIyJSYWHhlKKiot977ymK8neI+D+6urq+oWlaDgAYjDFREAQhKyvr0RdffPEfETF5tWtM6bwzkggAkQXf+W//wZ6Z91iPIi4lTc4gKe+iLa/FCCBpWUrzC0ekUOS1xLJnNwEiAdE4MC9k4CSJWZZly7KMAGABgCwIgsnNuunFMQAgETmxWIwQr/4wQjoPIBERmX//+k3GnAmPMgmBEiagYxMwZBc/0wFJEWWWpd3gFGW9op380Veyf3HgayFB6L0YYBIRVlVVDfV0VVUVebUAEWFtba1QUVFxTkDwOQl0EAAYAIhExAAA+vr6tmRlZf2VpmnFgjDodcVisRerq6sNIhKH80WvflDWVAiA6Pj2r/+peePkR53emI0OIQIiILJLDE8IHUYQTyHDlGPNzl8R/fqiN4tPt93eDlWpwXk99ho4uIZ+X11dPQRGABD4ADgjDOhw4MRh/C7HjWo5zYL82XMmZ01NjVhRUYEeLeX6gXQhk8EDuPQyRhRBEBgAwDXXXNO6b9++v5g7d+7XZVnO7u7ufn/WrFm/4WbbSZ/Unncatr2VlZVCVVXVWTFFVVUVS78GADQa4NOpKm//jkwJUY0IuMYJvvv3q1M3T3vbNlIWOiQDEYEmI/gVuCQdgwBk2gAJkwGCAEQmFmQq8v7W9cmb1ldCXaUE5dVj5tS2bduWPXHixICu64MqkDHKzc3tXbJkiQUA8NprrwWXL19+fVFRUZ4oihAKhfr37dvXuHbt2rALojVr1jhjAIkwHAjTwDgq6EbTVHzQ6HzlEJF47NixWbNmzTquKMqQ+Y7H49/JzMzcRETSWHjJsWjN0d57JJ/3MmvKI4QAYBZnP+FISGgzAQAIAgqK4WS32B7bAoxCg8rnQionBEaIKAadDOU+e1LwOogbBAAyxZLMycv4m6mbHvxx623VYSDA0bSl2/Hl5eU/1DTtUSKyEVFijKUMw5i+detWe/Xq1T/MyMhYq6pqsfvczJkzYfLkyd133XXX/zpx4sQ/3HzzzW18cBgAUH19fdaMGTPWqKoKjDESBAF1Xd+NiCcBQPrkk0/uzM3NLRdFsS0YDL7IQTSkgY4cObK0oKCgVNO0OalUapKmaVHLspqj0ejenTt3/gERda6dYBgucQgkJ0+eLM3Ly7tNkqS5tm37RVFsGhgY+KCurm4HIsZOnDhxThTNGEMAgJ6eHi0ajVZIkqQ5jkMAgJFI5P2pU6c2VlZWCtXV1YyDzdm6dWvgtttuWx0IBG5xHGemLMsmAJwOh8PvT58+fSci2gcPHlxYUlLyRbc/HMexOjs790+ePPmL3HUgQRAwHo93IuLbI/CkAgBQW1vbrNzc3HLGGAEAiKIotrW17Z43b95xt23n8pAAkLN53VS59QVD6HuZxK4NjhDeyJS2Fzsm/stj0y+Hz1A6bZrmO/ajP4oDm5gYeskWuzfYUvynFNzzg7uGtPXoM1ICADAMYyNnPWz+N3zq1Kkv6rre4GFELCIy+V/HvWgYRnd7e/vtvDwZAODw4cPzKE0Mw7j3wIEDJYlEot695jjOH/hzCgDAsWPHyuLx+G7GGI0kiUTi4/b29u+kmc6ziPATJ07cMDAw8IeRytB1vamlpeX+t956a5JlWe67mEREkUjkrwEAent7i9Kf6+3tfcJ9T7eu1tbWB3Vd//g87d1//Pjx6w4ePPhQ+r0DBw6s1HU97r2WTCbNurq6Cenv5n2/SCRSM0xZCzzATdOUC48iAIC1MG8aBDQVbZsBEhMCqiQ1RTZ3f+3lZmiq1KAZbCi7CDTuAoDpIO2eUW1kftzzjF2UuYMhAhAQKBI5mrwAAN4CODLmENG2bVJVlfiMFRzHkYqKirb7fL5cAEgBgJr2ng6f8baqqgUFBQVvnTp1qhwR93K/zLYsy5RlWXDLjMfjNyxYsOBlVVWnAoDBg4oY1whmT0/P93JycjZIkuT6kW7065YBACD5/f6Zfr//lUgkclt7e/vXAMAmInA1bUtLy+2FhYXbZFnO4M+xdH/Y5/NNnzp16huiKG4lIh0AMoaZsOQ4Tr8oipmuaRdFUXfbhIhWJBJ5Misr6xm3Tzz1DYnf779x+vTpu1pbW99ijNncZxUAAJPJ5CHLsl70+XxPAoANAKhpmjpv3ry7AeCfBwlAsD0m3XnvvffyfT7fKn7dAgA5HA7X3njjjUe9ViLNfFcMZlyyszhmOcntMHAkqR0qKwVoBvtCfL5heE8GBOh8kNlOegpARBGALAJA5lMvmNjl0SW6H1EUM/x+vwsONZVKhQDgFBH5BEFYqCiKj3euDAC2LMtqYWHh6zt37rx+1apVCWGwQIl3PgEAZGZmPsV9NxMAFD6wGiJSKBRal5+fv2HQeg6aNz4RznlzxhgTBMHJysr6KmPsDUT8qhtwHT58eOakSZN+wwFp80EVRwhG7cmTJ/9HxtjIscHgcxJ/B4kxJnD0p9rb2x/ggLQ9QY48XP+qqppTUlLyMBEBEYFLKRUXF2d0dXX9MhAI/EAURRUAHCKCQCDwMAelF+AiItqzZ8/+qqIombxelYiE7u7uV9PbP6YszaBz4Ehwjr2/6GCHIFsk8HBmmD5NL1K4r8JM0zRCodBf79ixY76maX/h8/luOnbs2MJoNPoqf2+HD5odCARmXXfddd9yfZz01iqKMsRPW5ZFhmGkDMMIHz58eGJubu5P3KZzQAqJRKIuFAp9q6+v7/aOjo6vxePxNwAA+X0JAKycnJyvtLW1rUNEBxGpqKjox54BkzgLgPF4/I2urq6HT506dXdXV9d/HRgYOOCW4dI9F5IJ+vDDD/M8bXYBKaRSqVg0Gn2xubn5vqampnv7+vqeMwwj5ImOvX0MgiBkzJs3r0nX9fe8PrKmacsbGhrmICKjT1UbIyIIBoMPe74LhmEcmD9//u50VmDsuW+6zLyeeUV4OxAEgRzHYU1NTffNmzdvR1pE2wQA3+7t7TUmTJjwXQ5MBADKzMz8JgD8RJIkJx3kgiBgKpVqisViz0Yikb1dXV3J/v7+cGlp6Y9kWVY9GkcIh8Mv5ObmPpHWtDeampp2FhcX/5ybeAEA2IQJE35QUVHx86effrokOzv7Tq5tRUEQmGmarKOj48GZM2fWppX1k0gk8lJWVtZ3PcAaC3UmAgDMmjVrrc/ny/dqSdM0P25qarpz/vz5JzyP/Nvu3btfuemmm37r8/mWpddl27ZARNja2ro5GAyW8350ZFmWioqK7geApwFA4NqVNTQ0XOPz+ZZyHScgIkQikVf5d9GrkwT4HAmnQYRYLPb6vHnzdhCRwmchQ0SqqakRiUh87rnn/j6ZTHYAgMgjVpRleeGePXsKksmk4ekXEgQBLMvqa2xsLCsoKPj5nDlzjpaWljapqprUNO0+bpaBa8j63NzcJ4hIqK+vl4lIrKurk4hImTFjxpZwOPyqxy0gTdOmrF+//oacnJxyURQFAGCu3xaPx9fPnDmzlogUXobIy2TZ2dmPDQwM7PNo/LG4OYynIr/i5Tsdx3E6Ozsfmj9//gneXyL/KKWlpV379++/37KsGNfcQ8+JomgjIh06dGi7ruttHFgAABAIBB4oLS2VeNtEAIDJkyc/KIqixBizAUAyDOPMiRMn/pVrYOeCzfdnCZcAANFo9HWuHc8iZTkfiRs2bEimUql/8wwWk2VZzsvLK2GMpTxm0QEAjMVi25YsWdJKRGp9fb1cWVkpTJs27QZN0/I9fi3E4/EtRIT79+8XlyxZYiGiU15ebtfW1jpEJITD4c2conE1A+Xk5JQqinK9x1MSU6nUwEcfffQzIhKqqqrs8vJyGxGdJUuWWPv375eICAcGBn6cRtCPNmEt7iPOAwB0J5JhGHtmzJixj1NsJncnHEQ0iUi+9dZbW3Vd/62rCYcMnTlo6u6++25d1/Vfeo2Lz+db8Oqrr36B971TWVmp+Hy+B3hfEQCAruu/Li8vjzDGpHT66PMESndAWUtLS7vLO45E8Mbj8ZZ0t1nTtOxIJHKOa+s4ziHuNzmLFy9m1dXVrLCwsIDP8iGzZhjGUUSkxYsXn1UGJ9XZ0aNHm23bDnsce5QkabYkSRNdXw0AwLKs0+Xl5X0AQOm83eLFix0eYDXatk2eYOa84jiOs27dOhkRs73gSCaT+9Ppm7RAHpPJZL33mTSwQ0tLyxbLskw+2RxEhPz8/If4ffbII4+UBgKBGRzUsm3bTmtr66sAALW1teeUKZzXQQP+8ajtz0A+GGiU9iLisB0MAJCRkXGO5g0Gg2fSZ3NOTg6l/05V1fj5tFd2drYhimLCe82yrEzLsnxpADLOAxTgXKRpWdaY+0UURRYOh/22bZ/FDKRSKeN8izQQkXRdT44U5TPG5CVLlnys6/pO732fz3dvXV1dNu+/b/I+sQEAdV3/w6JFi44QkTBcNm14UDokCIqMKEkiCqIsKDIKV/86PAQApmmaUFJSku9mWkbCbmZm5pR0UNm2HZEkaUzWIxQKeYHH+ABPICLctWuXMAIwgoyxHO81RVF6FEWJpF3Lw0+RctY71NbWIhFhSUlJQFVVN0c9Kq/LGBNra2vjHr7SnYQTzqdpiQiDwWD2SJPtyJFBTjkcDm9yXxMAHE3TCubMmVP28ssvqxkZGXfyNroE+isAACP109kX16xhAABqXDioxa2l/oi11B+zl/oi1tLMhPVbAAAoq76aV5gwTvr+JTff4nCprtLSUklRlLv4YAkAIFiWZcVisZOCIKge/m9Ehqy7u7vFcZyzCPJAIHATIlJZWdlZIHH9wMLCwsWKorjEOAIAJRKJo6ZptnjAxRRFmXngwIFrAQDq6urENFdAREQKBAKl3Jcd63hIAMBs2+7xpiQVRSl3+2kY7YyISKqqrhxJUx49etQhItyyZcs7hmEc9wRfFAgE7l21atU9siy7JL6USCQ++fDDD39PRFheXn6VYImvYA8cXL9QCm0gsWcDid0vmVJqMylHn//v/DejUlVumlHX9Z94UomMiBzTNBONjY03uEB0I0qP6XvGTU06juMQEUskEg0AAB9//PEc0zQdT5mk6/oDnjqRiLCyslLRdf00r9MiIpZMJpu3bt0a8KTzJLedXEO850mJOkREBw8enN7W1vaXnus2Txlu976rt6xt27Zl67re5r6v2043zdjT01No23bUm4IMh8OP8yDwDU+bbSKizs7Ox91UYHpdR44cWcHTmQ5/jhzHodOnT1/j6V+J9+vfefvNMIwzsVjsJH/OJCLq6Oj4vnf8RteUXnNWUyNCTQX/1Igwio9zNUXfsiz7Z8+e/XZbW9tqTgc5iOhs2rQpp7u7+9kJEyY86dIVPPrGaDT6Ojfho7kpBABidXW1mUgkfu3RHqRp2rR77rnnN++8885ERLQQ0UZEe/PmzVn9/f2vZWVl3cq5SOC0z95FixY1NzU17U6lUjEeFQsAwLKysu7q7+//2Ztvvhl0y0FEu6GhYc7tt9/+ts/nK3Y5v7F0DNfqEI/Hf+XJgAkAwAoKCv6hp6fnP/F+GqqrqanpjlmzZr0hSRIwxnAkP7eqqooBALS0tPzKNM2EG3ypqpobDAZL+M9k0zQTTU1NW7zPjKTSh+/4sxzQ2s9SFC7woKOouLj47UQicTCZTJ6QJElTFGWpz+cr5OZTdLM6iUSi7Y9//ONrbpQ6ljEmIty+ffvGlStXrtM0bZKbP87MzFy1fPnyQ5FI5G0AaAWAyaqq3qFp2hRP5gccx4GOjo6/5Txqb1dX18uTJk36IV89rgAAy8nJ+c933HHH6mg0+n8kSQrZtr1Q07QvKYrivxBAeugtWLt27e+3b9++NxgMfsHNHomiKOTn5/9PXde/bdv2+5waWhYIBEq96dyR4ke+6khExK5oNPqmoihrvRyl28/xePzN5cuXd462ZE6Cz5nYtm3ati1qmiYCgOX3+xf5/f5FaYMjuANiWRaFQqFvrlmzJupyIGPg/Iivw+w7ffr0Q1OmTNmpKIroLlpQVXWiqqqPpDfN2+f9/f3fmz9//gfcZNKOHTueveWWW76cmZm5BABMxpgsCIKjqupUVVW/le7T6roOsixbsizLPO03pv7ZtWuXc/LkyW+pqvqhoihBALAYY5IgCOTz+ZYAwJK0NkuxWMwMBoPKWLZS9PX1bc7MzFzrSWECAAiMMejv739lzFrlc8RTgiAI8c7OzvsNw+iCwUUGDAZXCxme5CYCgJRKpZJnzpy5f/bs2e+6S9fGKmvWrHGISJw9e/a7zc3N9xiG0SMIgrsIwvHUacCn+WzJNE29q6vrvxQUFLzsaoyqqiq48847U++8887dAwMDewFA4XlydwGvwctzAABTqdSZ5ubmv3LfZyR6awRR5s6de6y7u/suwzD6YHBvjxvFm566gGu3nSdPnnxquMxL2kR1iAhnzZq1J5lMHuBAZNyqCLqu/2nOnDn73HWcVy8o6Zxc2OXgQwMZGRk7Dx06dHM4HK4xTdOCwVU7GjeLomVZZjQa3d7c3LyssLCwlgdBTlqUDo7juH/xPAMhzp079+19+/Yt7u/v38gXMYieOjUOxr54PL7l1KlTNxUVFf3Ma8Kqq6vZU089Jdx3331d3//+98vPnDnzFE+DCnxiaQCgmqbJotHoW0ePHv3CwMDA24IgBLztdCNqD6sw3D2HiMSpU6e+98knnyyJx+O/NE0zztusuHUZhtHb1dX1QmZm5mq/3985xuyRiIgsEon82pvaRESIRqM/GyvmpCsENhyx/fu/LQLVoPjW3gAWZwERMTeIkpKGeKnrNIiIZWRkZC9btqwdAO5vbGycnZOTszQQCBQzxgTHcVp6e3vrFyxYcNKNOL0zl4ha+vv7r0W+KYdzga1evywdmDU1NWJ5eXk7AHz3F7/4xVMrVqy4XlXVmQUFBVJvby9LpVJNnZ2dh5YuXXpmuDo9fhkiYmrjxo1Pv/766y+XlZUtycrKmuH3+4VQKBSLxWIH3XbX19f7Ozs7r1UUZaidoVCoEwAgPz+/t6ura6kgCKJ7r6+vr9P7Djyt2AIA33j//fefKi4uXjxp0qT8VCoF8Xi87fjx439auXLlGU6Ea+nvbVnWcBOV8eVrt3hALKVSqVB9ff1v3KzYn1vz4VgPGMg4sP5FyfgnErs3WGL3BkvS/4ky3n9y0HequyhKyCQism07MTAwUFhZWSmcb+M9pzIum6UgIhxtoz/3H4VLKedyt3uUtmhEJPT29j7h7WPTNFO7d++e4bUq7t/jx4/PsyzL9tJAPT09L4xGA10ZTTm0r2aNM/tv7siMPXmfD8ki0s1Pl/wLEjqHTuSmZkxakyoKfo/FDEIikUSRxLBu+/r13QMAAGWXvrSyurqaVVVVIREJu3btEsrKys6a0efbDDXMoNNom6HcxQdpuwO9jgoby9bWkcrZtWsXlJWVndXu87VzmHuIiE5ra+tNeXl5G4jIPXdIbGpqevzaa6/9v11dXYF4PG6XlJSw/fv3AwzmsVk8Hl+dpiVDDQ0NnZ72DiUR8vLyviNJkhv0SbZtm+3t7a96kxt/HlDy/dpZG76eba+a93xblnoPw4QfgBD83sGxABZPy6C8DKABA5AIgMDGbE0STva93XvPhtPubsrLRlwODiK7iGcutj66HCZqLOWcr53p91yQ9vb2hqdMmXKL9960adM2/+53v/tSYWFhX3o57e3tj3JqaCgLZVnWe4899ljKdUNcs/zBBx/kZmZmPugJvjCRSPz7jTfeeOpC9ptfDlAiQBUWP16h9X557g5nbsEyCicA2AgpWQkBYroDgAIQORRQJLknkchoPvO3BhECVI2fknElsgp8JTgino5EIm9lZWWtZoxZgiCIwWBw0YoVK+p7e3t/aprmB47jxGRZnqpp2gPZ2dkPwdn5dezt7d00TIBjh0KhhxVFyYVPt3NAIpHYSBeYeLl0UNZVioDVdqS+6huspGAZ64mmkEBJ4+bSQIxACIQ5fknuN5JKY6ii786XTgIFBcDLtOViXM4RdzHH4cOHvz937twvqarqrppnfr9/mt/v/0ceqXt5T+LfLQBQzpw581pJSclej+ZDAHDWrVsnB4PBR/lKcwIAIZlMHtuzZ8+7FRUVcCGnclw6KMsWEgCAlem7ndkOQ8DBkx1EBMj0ySOoVhDiBoid8XfVD5ufiD7w0wNQUyECXtRiD3cno/czLiNzq8L111//0alTpyqmTJnya1VVMzgQLU7hiJy3dHjfipx/VQYGBt7cuHHjd7grwAAGF4wgon369OmVfr+/hHOcBAByJBJ5jdcpjaCgrnCgo4oIRAIQMJAEwKSlC719/wqSYA+5uJJIkmkxsFmL2p3YHVn5/F4DYPCowTW1F+uHqdzJVrmZysDPwilO/3/NuIiIv2tsbFw6ZcqU5zRNu0tRlHQFMsQAGIbRF4vFXpo4ceKPEBGqqqqGDhsoKytjlZWVUn5+/jPecUilUuZHH330K37W0wUpiivAUxKBIoIQT/VZC558JN1BdHlI3Q2QoAovQUOCaZrNkiR9BIPpMpmIktFo1BqH33mB6XBgHgWAexsaGq6ZNGnSCr/ffz0RFUuSJNu2nXIcp8WyrD0NDQ2/X7VqVU/6yR7u/qfNmzdrPT09Pw+Hw+42DyGZTDa7z1Rf4C7YS9coPFpWW17YZk8M3gsR3QKfIgv9yfbsLX+a31u1wADoQoDCs/FZe5QuQTuOy+XhIYWxsg0Xc1rbxZ4rdPkoobaXzvEZ/Lt6bMBaeyxnA13izE/vjHHEXQD1lXYSmhegAudHndEAWVdXJ6VxwXSxRw5ewL7vSgFgIUJt+jK2sACIDpx8fiIw4ilGAGQM5I4Oukz6eLQZOY6wSwfncNpyzGa3vLz8sv33ibGDckSqptbJ3va9WxPZ2jJKmAwRECSBkFj7qdOnTRw8nno8Ih6XywhKbnqzah67gSaoE2HAJEBCQIagqmBnBm7QJ2c9wRRRxqQ1mE5TJJQGUu/gMKcfjMu4XAZNWSMArHFS1056zpmb/2XoTwCIn6ZVSZOBJU1Aw+LfJZS6Y0m5sec1QACoGgfkuFwh802yoDuW7SBjDjAmDp1DbNqEBAIQEMkiiX5NUhtDT0Qe2tRyufPY4zIOynSnkpABASMCQE8ykxAQBcjUQLQIlP1tT8dufe6VcUCOyxUHJTKWjZpfAsYk8J6Wxxhg1CCpN7lXO937bHjF8/8biAYj8nEZlysDygoGACB/fGYj6KkdGDOIgCtKQQTRp/YocfNQpOyZj5IAADU14jggx+XqECKEmorxf2s3Ln9Gn7KmQoSKBQi7AM4673zwO4NBAnZcQ47LuIzLuIzLuFxx+X+k0h8v0hS4pAAAAABJRU5ErkJggg==";
+var N8N_WEBHOOK="https://prodigy-consulting.app.n8n.cloud/webhook/4341c64a-c6c7-41b8-b4e1-912a379044aa";
+
+// Calc
+function calcPot(a){
+  var p={fachkraft:55,spezialist:40,fuehrung:30,clevel:18},o={metro:45,mittel:55,laendlich:35};
+  var g={unter:-12,markt:0,ueber:8},v={neu:5,kurz:0,mittel:-8,lang:-18};
+  var r=((p[a.position]||40)+(o[a.standort]||45)+(a.remote?8:0)+(g[a.gehalt]||0)+(v[a.vakanz]||0))/1.6;
+  return Math.max(8,Math.min(55,Math.round(r)));
+}
+function calcPotProdigy(ohne,a){
+  var boost={fachkraft:28,spezialist:30,fuehrung:33,clevel:35};
+  return Math.min(95,ohne+(boost[a.position]||30));
+}
+function getKonkurrenz(a){
+  var base={metro:"Sehr hoch",mittel:"Hoch",laendlich:"Hoch"};
+  if(a.position==="clevel"||a.position==="fuehrung") return "Extrem hoch";
+  return base[a.standort]||"Hoch";
+}
+function calcVak(a){
+  var f={fachkraft:.75,spezialist:1,fuehrung:1.5,clevel:2.5},m={kurz:2,mittel:4,lang:7};
+  var jg=a.jahresgehalt||85000,mg=jg/12,fk=f[a.position]||1,mon=m[a.vakanz]||3;
+  var vk=Math.round(mg*mon*.33*fk),pk=Math.round(mg*mon*.45),sk=a.fehlbesetzung?Math.round(jg*.25):0;
+  return{vakanzkosten:vk,produktivitaet:pk,suchkosten:sk,gesamt:vk+pk+sk,prozent:Math.round((vk+pk+sk)/jg*100)};
+}
+var ML={fachkraft:"Gross",spezialist:"Mittel",fuehrung:"Klein",clevel:"Sehr klein"};
+var WL={unter:"Gering",markt:"Gut",ueber:"Sehr gut"};
+function fmt(n){return n.toLocaleString("de-DE")}
+
+// Gauge
+function gaugeH(v,color,gid){
+  var c=color||"#00C853";var id=gid||"g0";
+  return '<svg viewBox="0 0 240 130" width="220" height="120">'+
+    '<path d="M18 120 A102 102 0 0 1 222 120" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="12" stroke-linecap="round"/>'+
+    '<path d="M18 120 A102 102 0 0 1 222 120" fill="none" stroke="'+c+'" stroke-width="12" stroke-linecap="round" id="arc-'+id+'" stroke-dasharray="0 320" style="transition:stroke-dasharray 1.6s cubic-bezier(.22,1,.36,1)"/>'+
+    '<line x1="120" y1="120" x2="46" y2="120" stroke="'+c+'" stroke-width="3" stroke-linecap="round" id="needle-'+id+'" style="transition:transform 1.6s cubic-bezier(.22,1,.36,1);transform-origin:120px 120px;transform:rotate(0deg)"/>'+
+    '<circle cx="120" cy="120" r="4" fill="'+c+'"/></svg>';
+}
+function animGauge(gid,v){
+  var arc=document.getElementById("arc-"+gid);
+  var needle=document.getElementById("needle-"+gid);
+  if(arc) arc.setAttribute("stroke-dasharray",(v/100*320)+" 320");
+  if(needle) needle.style.transform="rotate("+(v/100*180)+"deg)";
+}
+
+// Counter animation
+var ctrs={};
+function animC(id,tgt,suf){
+  if(ctrs[id]&&ctrs[id].t===tgt)return;ctrs[id]={t:tgt};var t0=performance.now();
+  function tk(now){var p=Math.min((now-t0)/1600,1),e=1-Math.pow(1-p,3),el=document.getElementById(id);
+    if(el)el.textContent=fmt(Math.round(e*tgt))+(suf||"");if(p<1)requestAnimationFrame(tk)}
+  requestAnimationFrame(tk);
+}
+
+// State
+var S={weg:null,step:0,answers:{},showResult:false,showMail:false,showLoading:false,leadEmail:"",fadeIn:true};
+function setState(u){for(var k in u)S[k]=u[k];render()}
+function transition(fn){setState({fadeIn:false});setTimeout(function(){fn();setState({fadeIn:true})},250)}
+function pick(k,v,adv){
+  S.answers[k]=v;
+  if(adv!==false){if(S.step<4)transition(function(){S.step++});else transition(function(){S.showMail=true})}
+  else render();
+}
+function reset(){transition(function(){S.weg=null;S.step=0;S.answers={};S.showResult=false;S.showMail=false;S.showLoading=false;S.leadEmail=""})}
+function switchWeg(w){transition(function(){S.weg=w;S.step=0;S.answers={};S.showResult=false;S.showMail=false;S.showLoading=false})}
+
+// Validate
+function validateEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)}
+function validatePhone(p){var c=p.replace(/[\s\-\/\(\)\.]/g,"");if(/^\+/.test(c))c=c.substring(1);return /^\d{6,15}$/.test(c)}
+
+// n8n Webhook
+function sendToN8n(lead){
+  try{fetch(N8N_WEBHOOK,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lead)}).catch(function(){})}catch(ex){}
+}
+
+// Render
+function render(){
+  var a=S.answers;
+  var h='';
+
+  if(S.weg===null){
+    h+='<div class="sc">';
+    h+='<img src="'+LOGO_SM+'" alt="prodigy" style="height:32px;margin-bottom:28px">';
+    h+='<h1 class="headline">Wie sicher ist Ihre<br>n\u00E4chste <span class="ac">Besetzung</span>?</h1>';
+    h+='<p class="sub">Datenbasierte Analyse in unter 60 Sekunden.</p>';
+    h+='<div class="mr">';
+    h+='<button class="mb" onclick="transition(function(){S.weg=1})"><span class="mi">\uD83D\uDCCA</span><span class="ml">Besetzungspotenzial pr\u00FCfen</span><span class="ms">Wie gut stehen Ihre Chancen?</span></button>';
+    h+='<button class="mb" onclick="transition(function(){S.weg=2})"><span class="mi">\uD83D\uDCB0</span><span class="ml">Kosten Ihrer Vakanz berechnen</span><span class="ms">Was kostet Sie Ihre offene Stelle?</span></button>';
+    h+='</div></div>';
+  }
+
+  // RESULT SCREENS (shown AFTER mail form submit)
+  else if(S.weg===1&&S.showResult){
+    var ohne=calcPot(a),mit=calcPotProdigy(ohne,a),konk=getKonkurrenz(a);
+    h+='<div class="sc"><img src="'+LOGO_SM+'" alt="prodigy" style="height:28px;margin-bottom:14px"><p class="rl">Besetzungspotenzial</p>';
+    if(a.stellentitel)h+='<p class="rte">\u201E'+a.stellentitel+'\u201C</p>';
+    if(a.stadt)h+='<p style="font-size:13px;color:var(--txm);margin-bottom:16px">\uD83D\uDCCD '+a.stadt+'</p>';
+    h+='<div class="cmp-warn"><strong>\u26A0 Wettbewerbsintensit\u00E4t: '+konk+'</strong><br>Diese Position ist auf dem aktuellen Markt stark umk\u00E4mpft.</div>';
+    h+='<div class="cmp-wrap">';
+    h+='<div class="cmp-gauge"><div class="cg-label" style="color:#FF3B30">Ohne prodigy</div>';
+    h+=gaugeH(ohne,"#FF3B30","ohne");
+    h+='<div class="cg-val" style="color:#FF3B30" id="ctr-ohne">0 %</div>';
+    h+='<div class="cg-sub">Klassisches Recruiting</div></div>';
+    h+='<div class="cmp-gauge"><div class="cg-label" style="color:#00C853">Mit <img src="'+LOGO_SM+'" alt="prodigy" style="height:12px;vertical-align:middle"></div>';
+    h+=gaugeH(mit,"#00C853","mit");
+    h+='<div class="cg-val" style="color:#00C853" id="ctr-mit">0 %</div>';
+    h+='<div class="cg-sub">KI-basiertes Active Sourcing</div></div></div>';
+    h+='<div class="cmp-boost"><strong>+'+(mit-ohne)+' % h\u00F6here Besetzungswahrscheinlichkeit</strong> mit <img src="'+LOGO_SM+'" alt="prodigy" style="height:11px;vertical-align:middle"><br>Durch Zugang zu passiven Kandidaten und datengetriebenes Sourcing.</div>';
+    h+='<div class="rg">';
+    h+='<div class="ri"><span class="ril">Konkurrenzdruck</span><span class="riv" style="color:#FF3B30">'+konk+'</span></div>';
+    h+='<div class="ri"><span class="ril">Marktgr\u00F6\u00DFe</span><span class="riv">'+(ML[a.position]||"Mittel")+'</span></div>';
+    h+='<div class="ri"><span class="ril">Wechselbereitschaft</span><span class="riv">'+(WL[a.gehalt]||"Gut")+'</span></div></div>';
+    h+='<div class="usp-section"><div class="usp-title">Warum <img src="'+LOGO_SM+'" alt="prodigy" style="height:14px;vertical-align:middle"> ?</div><div class="usp-grid">';
+    h+='<div class="usp-item"><div class="usp-icon">\u2705</div><div class="usp-text"><div class="usp-h">Besetzungsgarantie</div><div class="usp-d">Wir besetzen Ihre Stelle \u2013 garantiert.</div></div></div>';
+    h+='<div class="usp-item"><div class="usp-icon">\uD83D\uDD04</div><div class="usp-text"><div class="usp-h">Kostenlose Nachbesetzung</div><div class="usp-d">Falls es nicht passt, besetzen wir ohne Mehrkosten nach.</div></div></div>';
+    h+='<div class="usp-item"><div class="usp-icon">\u26A1</div><div class="usp-text"><div class="usp-h">Besetzung in 6\u20138 Wochen</div><div class="usp-d">KI-basiertes Sourcing in Rekordzeit.</div></div></div>';
+    h+='</div></div>';
+    h+='<button class="cc" onclick="switchWeg(2)"><div class="ci">\uD83D\uDCB0</div><div class="ct">Wie hoch ist Ihr finanzielles Risiko?</div></button>';
+    h+='<div class="mail-send-card"><div class="msc-title">\uD83D\uDCE9 Ergebnis per E-Mail erhalten</div><div class="msc-desc">Wir senden Ihnen diese Analyse an:</div><div class="msc-email">'+S.leadEmail+'</div><button class="bp" style="padding:12px 32px;font-size:15px" onclick="sendResultByMail()">Jetzt senden</button></div>';
+    h+='<button class="lk" style="margin-top:8px" onclick="reset()">\u21BA Neu starten</button>';
+    h+='<div class="pw"><img src="'+LOGO_SM+'" alt="prodigy" style="height:14px"></div></div>';
+  }
+
+  else if(S.weg===2&&S.showResult){
+    var r=calcVak(a);
+    h+='<div class="sc"><img src="'+LOGO_SM+'" alt="prodigy" style="height:28px;margin-bottom:14px"><p class="rl">Ihr potenzieller Schaden</p>';
+    h+='<div style="font-size:clamp(40px,8vw,60px);font-weight:800;color:#FF3B30;letter-spacing:-2px;line-height:1" id="ctr2">0 \u20AC</div>';
+    if(a.stellentitel)h+='<p class="rte">\u201E'+a.stellentitel+'\u201C</p>';
+    h+='<p class="rsub">\u2248 '+r.prozent+' % eines Jahresgehalts</p>';
+    h+='<div class="rg">';
+    h+='<div class="ri"><span class="ril">Vakanzkosten</span><span class="riv">'+fmt(r.vakanzkosten)+' \u20AC</span></div>';
+    h+='<div class="ri"><span class="ril">Produktivit\u00E4tsverlust</span><span class="riv">'+fmt(r.produktivitaet)+' \u20AC</span></div>';
+    if(r.suchkosten>0)h+='<div class="ri"><span class="ril">Erneute Suchkosten</span><span class="riv">'+fmt(r.suchkosten)+' \u20AC</span></div>';
+    h+='</div>';
+    h+='<div class="usp-section"><div class="usp-title">So senken Sie diese Kosten mit <img src="'+LOGO_SM+'" alt="prodigy" style="height:14px;vertical-align:middle"></div><div class="usp-grid">';
+    h+='<div class="usp-item"><div class="usp-icon">\u2705</div><div class="usp-text"><div class="usp-h">Besetzungsgarantie</div><div class="usp-d">Kein Risiko \u2013 erst bei erfolgreicher Einstellung.</div></div></div>';
+    h+='<div class="usp-item"><div class="usp-icon">\uD83D\uDD04</div><div class="usp-text"><div class="usp-h">Kostenlose Nachbesetzung</div><div class="usp-d">Finanzielles Risiko geht gegen null.</div></div></div>';
+    h+='<div class="usp-item"><div class="usp-icon">\u26A1</div><div class="usp-text"><div class="usp-h">Besetzung in 6\u20138 Wochen</div><div class="usp-d">Jede Woche Vakanz kostet ca. '+fmt(Math.round((a.jahresgehalt||85000)/12*0.33))+' \u20AC.</div></div></div>';
+    h+='</div></div>';
+    h+='<button class="cc" onclick="switchWeg(1)"><div class="ci">\uD83D\uDCCA</div><div class="ct">Wie hoch ist Ihre Chance auf erfolgreiche Besetzung?</div></button>';
+    h+='<div class="mail-send-card"><div class="msc-title">\uD83D\uDCE9 Ergebnis per E-Mail erhalten</div><div class="msc-desc">Wir senden Ihnen diese Analyse an:</div><div class="msc-email">'+S.leadEmail+'</div><button class="bp" style="padding:12px 32px;font-size:15px" onclick="sendResultByMail()">Jetzt senden</button></div>';
+    h+='<button class="lk" style="margin-top:8px" onclick="reset()">\u21BA Neu starten</button>';
+    h+='<div class="pw"><img src="'+LOGO_SM+'" alt="prodigy" style="height:14px"></div></div>';
+  }
+
+  // MAIL FORM (shown BEFORE result, after step 5)
+  else if(S.showMail){
+    h+='<div class="sc">';
+    h+='<img src="'+LOGO_SM+'" alt="prodigy" style="height:28px;margin-bottom:20px">';
+    h+='<h2 style="font-size:24px;font-weight:800;margin-bottom:4px">Ihre Analyse ist fertig!</h2>';
+    h+='<p style="font-size:15px;color:var(--txm);margin-bottom:24px">Geben Sie Ihre Kontaktdaten ein, um Ihr pers\u00F6nliches Ergebnis zu sehen.</p>';
+    h+='<div style="width:100%;max-width:420px">';
+    h+='<input class="inf" placeholder="Ihr Name *" id="ml-n">';
+    h+='<input class="inf" placeholder="Firma *" id="ml-f">';
+    h+='<input class="inf" placeholder="E-Mail-Adresse *" type="email" id="ml-e">';
+    h+='<div id="ml-e-err" style="color:#FF3B30;font-size:12px;margin:-6px 0 10px;display:none"></div>';
+    h+='<input class="inf" placeholder="Telefon *" type="tel" id="ml-t">';
+    h+='<div id="ml-t-err" style="color:#FF3B30;font-size:12px;margin:-6px 0 10px;display:none"></div>';
+    h+='<button class="bp" style="width:100%;margin-top:12px" onclick="submitLead()">Ergebnis anzeigen \u2192</button>';
+    h+='</div></div>';
+  }
+
+  // STEP SCREENS - WEG 1
+  else if(S.weg===1){
+    var pr="";for(var i=0;i<5;i++)pr+='<div class="pd '+(i<=S.step?"a":"")+'"></div>';
+    if(S.step===0){
+      h+='<div class="sc"><div class="progress">'+pr+'</div><p class="sl">Schritt 1 von 5</p>';
+      h+='<h2 class="q">Welche Position m\u00F6chten Sie besetzen?</h2><div class="og">';
+      [["fachkraft","Fachkraft"],["spezialist","Spezialist"],["fuehrung","F\u00FChrungskraft"],["clevel","C-Level"]].forEach(function(x){
+        h+='<button class="ob '+(a.position===x[0]?"a":"")+'" onclick="pick(\'position\',\''+x[0]+'\')">'+x[1]+'</button>';
+      });
+      h+='</div></div>';
+    }else if(S.step===1){
+      h+='<div class="sc"><div class="progress">'+pr+'</div><p class="sl">Schritt 2 von 5</p>';
+      h+='<h2 class="q">Wie lautet der Stellentitel?</h2>';
+      h+='<input class="ti" id="ti1" placeholder="z.B. DevOps Engineer" value="'+(a.stellentitel||"")+'" oninput="var b=document.getElementById(\'ti1-btn\');if(this.value.trim())b.disabled=false;else b.disabled=true">';
+      h+='<p class="th">Pflichtfeld</p>';
+      h+='<button class="bp" id="ti1-btn" style="margin-top:24px" '+(a.stellentitel?'':'disabled')+' onclick="var v=document.getElementById(\'ti1\').value.trim();if(!v)return;S.answers.stellentitel=v;transition(function(){S.step++})">Weiter \u2192</button></div>';
+    }else if(S.step===2){
+      h+='<div class="sc"><div class="progress">'+pr+'</div><p class="sl">Schritt 3 von 5</p>';
+      h+='<h2 class="q">Wo wird gesucht?</h2>';
+      h+='<input class="ti" id="city1" placeholder="Stadt (optional)" value="'+(a.stadt||"")+'" style="margin-bottom:16px">';
+      h+='<div class="og">';
+      [["metro","Metropolregion"],["mittel","Mittelstadt"],["laendlich","L\u00E4ndlich"]].forEach(function(x){
+        h+='<button class="ob '+(a.standort===x[0]?"a":"")+'" onclick="S.answers.stadt=document.getElementById(\'city1\').value;pick(\'standort\',\''+x[0]+'\',false)">'+x[1]+'</button>';
+      });
+      h+='</div><div class="tr">';
+      h+='<button class="tb '+(a.remote===true?"a":"")+'" onclick="S.answers.stadt=document.getElementById(\'city1\').value;pick(\'remote\',true,false)">Remote m\u00F6glich</button>';
+      h+='<button class="tb '+(a.remote===false?"a":"")+'" onclick="S.answers.stadt=document.getElementById(\'city1\').value;pick(\'remote\',false,false)">Vor Ort</button></div>';
+      h+='<button class="bp" style="margin-top:24px;'+(a.standort?"":"opacity:.3")+'" '+(a.standort?"":"disabled");
+      h+=' onclick="S.answers.stadt=document.getElementById(\'city1\').value;if(S.answers.remote==null)S.answers.remote=false;transition(function(){S.step++})">Weiter \u2192</button></div>';
+    }else if(S.step===3){
+      h+='<div class="sc"><div class="progress">'+pr+'</div><p class="sl">Schritt 4 von 5</p>';
+      h+='<h2 class="q">Wie liegt das Gehalt im Marktvergleich?</h2><div class="og">';
+      [["unter","Unter Marktniveau"],["markt","Marktniveau"],["ueber","\u00DCber Marktniveau"]].forEach(function(x){
+        h+='<button class="ob '+(a.gehalt===x[0]?"a":"")+'" onclick="pick(\'gehalt\',\''+x[0]+'\')">'+x[1]+'</button>';
+      });
+      h+='</div></div>';
+    }else if(S.step===4){
+      h+='<div class="sc"><div class="progress">'+pr+'</div><p class="sl">Schritt 5 von 5</p>';
+      h+='<h2 class="q">Wie lange ist die Stelle bereits offen?</h2><div class="og">';
+      [["neu","Noch nicht ausgeschrieben"],["kurz","< 2 Monate"],["mittel","2\u20134 Monate"],["lang","> 4 Monate"]].forEach(function(x){
+        h+='<button class="ob '+(a.vakanz===x[0]?"a":"")+'" onclick="pick(\'vakanz\',\''+x[0]+'\')">'+x[1]+'</button>';
+      });
+      h+='</div></div>';
+    }
+  }
+
+  // STEP SCREENS - WEG 2
+  else if(S.weg===2){
+    var pr2="";for(var j=0;j<5;j++)pr2+='<div class="pd '+(j<=S.step?"a":"")+'"></div>';
+    if(S.step===0){
+      h+='<div class="sc"><div class="progress">'+pr2+'</div><p class="sl">Schritt 1 von 5</p>';
+      h+='<h2 class="q">Welche Position ist betroffen?</h2><div class="og">';
+      [["fachkraft","Fachkraft"],["spezialist","Spezialist"],["fuehrung","F\u00FChrungskraft"],["clevel","C-Level"]].forEach(function(x){
+        h+='<button class="ob '+(a.position===x[0]?"a":"")+'" onclick="pick(\'position\',\''+x[0]+'\')">'+x[1]+'</button>';
+      });
+      h+='</div></div>';
+    }else if(S.step===1){
+      h+='<div class="sc"><div class="progress">'+pr2+'</div><p class="sl">Schritt 2 von 5</p>';
+      h+='<h2 class="q">Wie lautet der Stellentitel?</h2>';
+      h+='<input class="ti" id="ti2" placeholder="z.B. Senior Sales Manager" value="'+(a.stellentitel||"")+'">';
+      h+='<p class="th">Optional</p>';
+      h+='<button class="bp" style="margin-top:24px" onclick="S.answers.stellentitel=document.getElementById(\'ti2\').value;transition(function(){S.step++})">Weiter \u2192</button></div>';
+    }else if(S.step===2){
+      var gv=a.jahresgehalt||85000;
+      h+='<div class="sc"><div class="progress">'+pr2+'</div><p class="sl">Schritt 3 von 5</p>';
+      h+='<h2 class="q">Wie hoch ist das Jahresgehalt?</h2>';
+      h+='<div class="sv" id="sal-display">'+fmt(gv)+' \u20AC</div>';
+      h+='<div class="slider-wrap"><input type="range" id="sal-slider" min="30000" max="250000" step="5000" value="'+gv+'"></div>';
+      h+='<div class="slab"><span>30.000 \u20AC</span><span>250.000 \u20AC</span></div>';
+      h+='<button class="bp" style="margin-top:28px" onclick="if(!S.answers.jahresgehalt)S.answers.jahresgehalt=85000;transition(function(){S.step++})">Weiter \u2192</button></div>';
+    }else if(S.step===3){
+      h+='<div class="sc"><div class="progress">'+pr2+'</div><p class="sl">Schritt 4 von 5</p>';
+      h+='<h2 class="q">Wie lange ist die Stelle unbesetzt?</h2><div class="og">';
+      [["kurz","< 2 Monate"],["mittel","2\u20134 Monate"],["lang","> 4 Monate"]].forEach(function(x){
+        h+='<button class="ob '+(a.vakanz===x[0]?"a":"")+'" onclick="pick(\'vakanz\',\''+x[0]+'\')">'+x[1]+'</button>';
+      });
+      h+='</div></div>';
+    }else if(S.step===4){
+      h+='<div class="sc"><div class="progress">'+pr2+'</div><p class="sl">Schritt 5 von 5</p>';
+      h+='<h2 class="q">Mussten Sie diese Position bereits nachbesetzen?</h2>';
+      h+='<div class="og" style="max-width:300px">';
+      h+='<button class="ob '+(a.fehlbesetzung===true?"a":"")+'" onclick="pick(\'fehlbesetzung\',true)">Ja</button>';
+      h+='<button class="ob '+(a.fehlbesetzung===false?"a":"")+'" onclick="pick(\'fehlbesetzung\',false)">Nein</button>';
+      h+='</div></div>';
+    }
+  }
+
+  // Back button
+  if(S.weg!==null&&!S.showResult&&!S.showMail){
+    h+='<button class="bk" onclick="'+(S.step>0?'transition(function(){S.step--})':'reset()')+'">\u2190 Zur\u00FCck</button>';
+  }
+
+  var app=document.getElementById("app");
+  app.className=S.fadeIn?"fi":"fo";
+  app.innerHTML=h;
+
+  // Slider binding
+  var slider=document.getElementById("sal-slider");
+  if(slider){
+    function onSlide(){var v=Number(slider.value);S.answers.jahresgehalt=v;var d=document.getElementById("sal-display");if(d)d.textContent=fmt(v)+" \u20AC"}
+    slider.addEventListener("input",onSlide);slider.addEventListener("change",onSlide);
+  }
+
+  // Gauge animations
+  if(S.weg===1&&S.showResult){
+    var ohne2=calcPot(a),mit2=calcPotProdigy(ohne2,a);
+    setTimeout(function(){animGauge("ohne",ohne2);animGauge("mit",mit2);animC("ctr-ohne",ohne2," %");animC("ctr-mit",mit2," %")},150);
+  }
+  if(S.weg===2&&S.showResult)setTimeout(function(){animC("ctr2",calcVak(a).gesamt," \u20AC")},150);
+}
+
+// Submit lead -> show loading -> show result
+function submitLead(){
+  var n=document.getElementById("ml-n").value.trim(),e=document.getElementById("ml-e").value.trim();
+  var f=document.getElementById("ml-f").value.trim(),t=document.getElementById("ml-t").value.trim();
+  var eErr=document.getElementById("ml-e-err"),tErr=document.getElementById("ml-t-err");
+  var valid=true;
+  eErr.style.display="none";tErr.style.display="none";
+  if(!n||!f){alert("Bitte Name und Firma eingeben.");return}
+  if(!e){eErr.textContent="Bitte E-Mail eingeben.";eErr.style.display="block";valid=false}
+  else if(!validateEmail(e)){eErr.textContent="Bitte g\u00FCltige E-Mail eingeben.";eErr.style.display="block";valid=false}
+  if(!t){tErr.textContent="Bitte Telefonnummer eingeben.";tErr.style.display="block";valid=false}
+  else if(!validatePhone(t)){tErr.textContent="Bitte g\u00FCltige Telefonnummer eingeben.";tErr.style.display="block";valid=false}
+  if(!valid)return;
+
+  S.leadEmail=e;
+
+  var a=S.answers,ergebnis,details;
+  var VL2={neu:"Noch nicht ausgeschrieben",kurz:"< 2 Monate",mittel:"2-4 Monate",lang:"> 4 Monate"};
+  if(S.weg===1){var ohneL=calcPot(a),mitL=calcPotProdigy(ohneL,a);ergebnis="Ohne:"+ohneL+"% / Mit prodigy:"+mitL+"%";details="Konkurrenz:"+getKonkurrenz(a)+",Markt:"+(ML[a.position]||"-")+",Wechsel:"+(WL[a.gehalt]||"-")}
+  else{var r=calcVak(a);ergebnis=fmt(r.gesamt)+" EUR Schaden";details="Vakanz:"+fmt(r.vakanzkosten)+" EUR,Prod:"+fmt(r.produktivitaet)+" EUR,Such:"+fmt(r.suchkosten)+" EUR"}
+
+  sendToN8n({name:n,firma:f,email:e,telefon:t,stellentitel:a.stellentitel||"",stadt:a.stadt||"",vakanzdauer:VL2[a.vakanz]||"-",weg:S.weg===1?"Besetzungspotenzial":"Vakanzkosten",ergebnis:ergebnis,details:details,quelle:"website",timestamp:new Date().toISOString()});
+
+  // Show loading overlay
+  showLoading();
+}
+
+function showLoading(){
+  var ov=document.createElement("div");ov.className="loading-ov";ov.id="loading-ov";
+  ov.innerHTML='<img src="'+LOGO_SM+'" alt="prodigy" style="height:32px;margin-bottom:8px">'+
+    '<h2>Vielen Dank f\u00FCr Ihre Angaben!</h2>'+
+    '<p>Ihre Situation wird analysiert...</p>'+
+    '<div class="loading-bar"><div class="fill"></div></div>';
+  document.body.appendChild(ov);
+
+  setTimeout(function(){
+    var el=document.getElementById("loading-ov");
+    if(el)el.remove();
+    S.showMail=false;
+    transition(function(){S.showResult=true});
+  },3200);
+}
+
+function sendResultByMail(){
+  var a=S.answers;
+  var ergebnis,details;
+  if(S.weg===1){var ohneL=calcPot(a),mitL=calcPotProdigy(ohneL,a);ergebnis="Ohne:"+ohneL+"% / Mit prodigy:"+mitL+"%";details="Konkurrenz:"+getKonkurrenz(a)}
+  else{var r=calcVak(a);ergebnis=fmt(r.gesamt)+" EUR Schaden";details="Vakanz:"+fmt(r.vakanzkosten)+", Prod:"+fmt(r.produktivitaet)+", Such:"+fmt(r.suchkosten)}
+  sendToN8n({email:S.leadEmail,aktion:"ergebnis_per_mail",weg:S.weg===1?"Besetzungspotenzial":"Vakanzkosten",stellentitel:a.stellentitel||"",ergebnis:ergebnis,details:details,quelle:"website",timestamp:new Date().toISOString()});
+  showToast("\u2713 Ergebnis wird an "+S.leadEmail+" gesendet!");
+}
+
+function showToast(m){var t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},2600)}
+
+render();
+</script>
+</body>
+</html>
